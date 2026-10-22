@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICT Fusion | Customer Registration</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5fb;
+  color:#17213a;
+}
+.container{
+  max-width:520px;
+  margin:50px auto;
+  padding:20px;
+}
+.card{
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 8px 30px #17213a12;
+}
+.header{
+  background:#172b61;
+  color:white;
+  text-align:center;
+  padding:25px;
+  border-radius:13px;
+  margin-bottom:25px;
+}
+.header h1{margin:0;font-size:28px}
+.header p{margin:8px 0 0;color:#dbeafe}
+h2{font-size:21px;margin:0 0 8px}
+.desc{color:#64748b;font-size:14px;margin-bottom:22px}
+label{
+  display:block;
+  font-weight:bold;
+  font-size:14px;
+  margin:15px 0 7px;
+}
+input,textarea{
+  width:100%;
+  padding:13px;
+  border:1px solid #d7deeb;
+  border-radius:8px;
+  font-size:15px;
+  font-family:inherit;
+}
+input:focus,textarea:focus{
+  outline:2px solid #315efb40;
+  border-color:#315efb;
+}
+textarea{resize:vertical;min-height:95px}
+.consent{
+  display:flex;
+  gap:9px;
+  align-items:flex-start;
+  font-size:13px;
+  color:#526078;
+  margin:18px 0;
+}
+.consent input{width:auto;margin-top:3px}
+button{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:9px;
+  background:#315efb;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+button:disabled{opacity:.6;cursor:wait}
+#message{
+  margin-top:15px;
+  padding:12px;
+  border-radius:8px;
+  display:none;
+  font-size:14px;
+}
+.success{display:block!important;background:#dcfce7;color:#166534}
+.error{display:block!important;background:#fee2e2;color:#991b1b}
+footer{text-align:center;color:#94a3b8;font-size:12px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="header">
+      <h1>ICT Fusion</h1>
+      <p>Student & Customer Registration</p>
+    </div>
+
+    <h2>নতুন নিবন্ধন</h2>
+    <p class="desc">অনুগ্রহ করে আপনার সঠিক তথ্য প্রদান করুন।</p>
+
+    <form id="customerForm">
+      <label for="name">পূর্ণ নাম *</label>
+      <input id="name" name="name" maxlength="100"
+             autocomplete="name" required>
+
+      <label for="phone">মোবাইল নম্বর *</label>
+      <input id="phone" name="phone" type="tel"
+             maxlength="20" autocomplete="tel"
+             placeholder="01XXXXXXXXX" required>
+
+      <label for="address">সম্পূর্ণ ঠিকানা *</label>
+      <textarea id="address" name="address"
+                maxlength="500" autocomplete="street-address"
+                required></textarea>
+
+      <label class="consent">
+        <input type="checkbox" id="consent" required>
+        <span>আমি সম্মতি দিচ্ছি যে ICT Fusion আমার প্রদত্ত তথ্য ভর্তি ও যোগাযোগের প্রয়োজনে সংরক্ষণ করতে পারবে।</span>
+      </label>
+
+      <button id="submitBtn" type="submit">তথ্য জমা দিন</button>
+      <div id="message" role="status"></div>
+    </form>
+  </div>
+
+  <footer>
+    ICT Fusion · Customer Registration
+  </footer>
+</div>
+
+<script>
+const form = document.getElementById("customerForm");
+const message = document.getElementById("message");
+const button = document.getElementById("submitBtn");
+
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  message.className = "";
+  message.style.display = "none";
+  button.disabled = true;
+  button.textContent = "জমা হচ্ছে...";
+
+  const data = {
+    name: document.getElementById("name").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    consent: document.getElementById("consent").checked
+  };
+
+  try {
+    const response = await fetch("/api/customers", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "তথ্য জমা হয়নি।");
+    }
+
+    message.textContent = "সফলভাবে তথ্য জমা হয়েছে। ধন্যবাদ!";
+    message.className = "success";
+    form.reset();
+
+  } catch (error) {
+    message.textContent = error.message || "সমস্যা হয়েছে। আবার চেষ্টা করুন।";
+    message.className = "error";
+  } finally {
+    button.disabled = false;
+    button.textContent = "তথ্য জমা দিন";
+  }
+});
+</script>
+</body>
+</html>
